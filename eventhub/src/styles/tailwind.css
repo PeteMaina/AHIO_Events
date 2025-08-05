@@ -1,0 +1,85 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Primary Colors */
+    --color-primary: #DC2626; /* Bold red (primary) - red-600 */
+    --color-primary-dark: #7F1D1D; /* Deeper red variant (secondary) - red-900 */
+    --color-primary-light: #FEF2F2; /* Subtle red tint (accent) - red-50 */
+    
+    /* Background Colors */
+    --color-background: #FFFFFF; /* Pure white (background) - white */
+    --color-surface: #F9FAFB; /* Neutral gray (surface) - gray-50 */
+    
+    /* Text Colors */
+    --color-text-primary: #111827; /* Near-black (text primary) - gray-900 */
+    --color-text-secondary: #6B7280; /* Medium gray (text secondary) - gray-500 */
+    
+    /* Status Colors */
+    --color-success: #059669; /* Professional green (success) - emerald-600 */
+    --color-warning: #D97706; /* Amber (warning) - amber-600 */
+    --color-error: #DC2626; /* Matching primary red (error) - red-600 */
+    
+    /* Border Colors */
+    --color-border: #E5E7EB; /* Neutral gray (border) - gray-200 */
+    --color-border-light: #F3F4F6; /* Light gray (border light) - gray-100 */
+  }
+
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    line-height: 1.6;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+@layer components {
+  .nav-transition {
+    transition: all 200ms ease-out;
+  }
+  
+  .nav-shadow {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .nav-hover {
+    transition: background-color 200ms ease-out, color 200ms ease-out;
+  }
+  
+  .nav-hover:hover {
+    background-color: var(--color-primary-light);
+    color: var(--color-primary);
+  }
+  
+  .nav-active {
+    background-color: var(--color-primary);
+    color: white;
+  }
+  
+  .nav-active:hover {
+    background-color: var(--color-primary-dark);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
