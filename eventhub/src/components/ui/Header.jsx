@@ -1,29 +1,22 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import Icon from '../AppIcon';
 
 const Header = () => {
+  const { isAuthenticated, user, logout } = useAuth();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [userRole, setUserRole] = useState('attendee'); // attendee, organizer, admin
   const userMenuRef = useRef(null);
   const mobileMenuRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Mock user data
-  const currentUser = {
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    avatar: '/assets/images/avatar.jpg',
-    roles: ['attendee', 'organizer', 'admin']
-  };
-
   // Navigation items based on user role
   const getNavigationItems = () => {
-    if (userRole === 'admin' || userRole === 'organizer') {
+    if (user?.role === 'admin' || user?.role === 'organizer') {
       return [
         { label: 'Events', path: '/admin-event-management', icon: 'Calendar', roles: ['admin', 'organizer'] },
         { label: 'Venues', path: '/venue-management-system', icon: 'MapPin', roles: ['admin', 'organizer'] },
@@ -66,22 +59,7 @@ const Header = () => {
     }
   };
 
-  const handleRoleSwitch = (newRole) => {
-    setUserRole(newRole);
-    setIsUserMenuOpen(false);
-    // Navigate to appropriate dashboard based on role
-    if (newRole === 'admin' || newRole === 'organizer') {
-      navigate('/admin-event-management');
-    } else {
-      navigate('/event-discovery-dashboard');
-    }
-  };
 
-  const handleLogout = () => {
-    setIsUserMenuOpen(false);
-    // Handle logout logic here
-    console.log('Logging out...');
-  };
 
   const isActiveRoute = (path) => {
     return location.pathname === path;
@@ -122,7 +100,7 @@ const Header = () => {
           </nav>
 
           {/* Search Bar (Desktop) */}
-          {(userRole === 'attendee') && (
+          {(user?.role === 'attendee') && (
             <div className="hidden md:flex flex-1 max-w-md mx-8">
               <form onSubmit={handleSearch} className="w-full relative">
                 <input
@@ -132,10 +110,10 @@ const Header = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
                 />
-                <Icon 
-                  name="Search" 
-                  size={16} 
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary" 
+                <Icon
+                  name="Search"
+                  size={16}
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary"
                 />
               </form>
             </div>
@@ -144,7 +122,7 @@ const Header = () => {
           {/* Right Side Actions */}
           <div className="flex items-center space-x-4">
             {/* Mobile Search Toggle */}
-            {(userRole === 'attendee') && (
+            {(user?.role === 'attendee') && (
               <button
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
                 className="md:hidden p-2 text-text-secondary hover:text-primary nav-transition"
@@ -153,68 +131,69 @@ const Header = () => {
               </button>
             )}
 
-            {/* User Menu */}
-            <div className="relative" ref={userMenuRef}>
-              <button
-                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className="flex items-center space-x-2 p-2 rounded-lg hover:bg-surface nav-transition"
-              >
-                <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                  <Icon name="User" size={16} color="white" />
-                </div>
-                <span className="hidden sm:block text-sm font-medium text-text-primary">
-                  {currentUser.name}
-                </span>
-                <Icon name="ChevronDown" size={16} className="text-text-secondary" />
-              </button>
-
-              {/* User Dropdown */}
-              {isUserMenuOpen && (
-                <div className="absolute right-0 mt-2 w-64 bg-background rounded-lg shadow-modal border border-border animate-scale-in">
-                  <div className="p-4 border-b border-border">
-                    <p className="text-sm font-medium text-text-primary">{currentUser.name}</p>
-                    <p className="text-xs text-text-secondary">{currentUser.email}</p>
+            {/* Auth Buttons or User Menu */}
+            {isAuthenticated ? (
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  className="flex items-center space-x-2 p-2 rounded-lg hover:bg-surface nav-transition"
+                >
+                  <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                    <Icon name="User" size={16} color="white" />
                   </div>
-                  
-                  {/* Role Switcher */}
-                  {currentUser.roles.length > 1 && (
-                    <div className="p-2 border-b border-border">
-                      <p className="text-xs font-medium text-text-secondary mb-2 px-2">Switch Role</p>
-                      {currentUser.roles.map((role) => (
-                        <button
-                          key={role}
-                          onClick={() => handleRoleSwitch(role)}
-                          className={`w-full text-left px-3 py-2 text-sm rounded-md nav-transition capitalize ${
-                            userRole === role
-                              ? 'bg-primary text-white' :'text-text-primary hover:bg-surface'
-                          }`}
-                        >
-                          {role}
-                        </button>
-                      ))}
+                  <span className="hidden sm:block text-sm font-medium text-text-primary">
+                    {user.name}
+                  </span>
+                  <Icon name="ChevronDown" size={16} className="text-text-secondary" />
+                </button>
+
+                {/* User Dropdown */}
+                {isUserMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-64 bg-background rounded-lg shadow-modal border border-border animate-scale-in">
+                    <div className="p-4 border-b border-border">
+                      <p className="text-sm font-medium text-text-primary">{user.name}</p>
+                      <p className="text-xs text-text-secondary">{user.email}</p>
                     </div>
-                  )}
 
-                  <div className="p-2">
-                    <Link
-                      to="/user-dashboard"
-                      className="flex items-center space-x-2 px-3 py-2 text-sm text-text-primary hover:bg-surface rounded-md nav-transition"
-                      onClick={() => setIsUserMenuOpen(false)}
-                    >
-                      <Icon name="Settings" size={16} />
-                      <span>Profile Settings</span>
-                    </Link>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-error hover:bg-red-50 rounded-md nav-transition"
-                    >
-                      <Icon name="LogOut" size={16} />
-                      <span>Sign Out</span>
-                    </button>
+                    <div className="p-2">
+                      <Link
+                        to="/user-dashboard"
+                        className="flex items-center space-x-2 px-3 py-2 text-sm text-text-primary hover:bg-surface rounded-md nav-transition"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        <Icon name="Settings" size={16} />
+                        <span>Profile Settings</span>
+                      </Link>
+                      <button
+                        onClick={() => {
+                          logout();
+                          setIsUserMenuOpen(false);
+                        }}
+                        className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-error hover:bg-red-50 rounded-md nav-transition"
+                      >
+                        <Icon name="LogOut" size={16} />
+                        <span>Sign Out</span>
+                      </button>
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <Link
+                  to="/login"
+                  className="px-4 py-2 text-sm font-medium text-text-primary hover:text-primary nav-transition"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  to="/signup"
+                  className="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-dark nav-transition"
+                >
+                  Sign Up
+                </Link>
+              </div>
+            )}
 
             {/* Mobile Menu Toggle */}
             <button
@@ -227,7 +206,7 @@ const Header = () => {
         </div>
 
         {/* Mobile Search Bar */}
-        {isSearchOpen && (userRole === 'attendee') && (
+        {isSearchOpen && (user?.role === 'attendee') && (
           <div className="md:hidden py-4 border-t border-border animate-fade-in">
             <form onSubmit={handleSearch} className="relative">
               <input
@@ -238,10 +217,10 @@ const Header = () => {
                 className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
                 autoFocus
               />
-              <Icon 
-                name="Search" 
-                size={16} 
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary" 
+              <Icon
+                name="Search"
+                size={16}
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary"
               />
             </form>
           </div>
@@ -250,7 +229,7 @@ const Header = () => {
 
       {/* Mobile Navigation Menu */}
       {isMobileMenuOpen && (
-        <div 
+        <div
           ref={mobileMenuRef}
           className="md:hidden bg-background border-t border-border animate-slide-in"
         >
@@ -268,6 +247,24 @@ const Header = () => {
                 <span>{item.label}</span>
               </Link>
             ))}
+            {!isAuthenticated && (
+              <>
+                <Link
+                  to="/login"
+                  className="flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-text-secondary hover:text-primary hover:bg-primary-light nav-transition"
+                >
+                  <Icon name="LogIn" size={18} />
+                  <span>Sign In</span>
+                </Link>
+                <Link
+                  to="/signup"
+                  className="flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium bg-primary text-white nav-transition"
+                >
+                  <Icon name="UserPlus" size={18} />
+                  <span>Sign Up</span>
+                </Link>
+              </>
+            )}
           </nav>
         </div>
       )}
